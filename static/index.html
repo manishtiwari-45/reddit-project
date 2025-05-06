@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark" class="modern-theme">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reddit Analyzer</title>
+    <!-- Bootstrap CSS with custom theme -->
+    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
+    <!-- Poppins & Inter Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Animate.css for smoother animations -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Chart.js for data visualization -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <!-- D3.js for interactive data visualization -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <!-- Preload key assets for improved performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <meta name="theme-color" content="#6d5dfc">
+    <meta name="description" content="Analyze Reddit content with sentiment analysis, thread visualization, and more.">
+</head>
+<body>
+    <!-- Header -->
+    <header class="py-3 border-bottom">
+        <div class="container d-flex flex-wrap justify-content-between align-items-center">
+            <a href="#" class="d-flex align-items-center mb-2 mb-lg-0 text-decoration-none">
+                <h1 class="fs-4 mb-0 text-primary"><i class="fab fa-reddit me-2"></i>Reddit Analyzer</h1>
+            </a>
+            <div class="d-flex align-items-center">
+                <div id="theme-toggle" class="me-3">
+                    <div class="theme-switch-wrapper" id="dark-mode-toggle">
+                        <div class="theme-switch-knob"></div>
+                        <span class="visually-hidden">Toggle dark mode</span>
+                    </div>
+                </div>
+                <div id="user-status" class="d-flex align-items-center gap-2">
+                    <div id="logged-out-state">
+                        <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#loginModal">
+                            <i class="fas fa-user me-1"></i> Login
+                        </button>
+                    </div>
+                    <div id="logged-in-state" class="d-none">
+                        <div class="d-flex align-items-center">
+                            <div class="avatar-circle me-2">
+                                <span class="initials"></span>
+                            </div>
+                            <div class="d-flex flex-column">
+                                <span class="fw-semibold" id="username-display"></span>
+                                <button id="logout-btn" class="btn btn-sm btn-outline-danger mt-1">
+                                    <i class="fas fa-sign-out-alt me-1"></i> Logout
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container py-4">
+        <!-- Navigation Tabs -->
+        <ul class="nav nav-tabs mb-4" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="dashboard-tab" data-bs-toggle="tab" data-bs-target="#dashboard" 
+                    type="button" role="tab" aria-controls="dashboard" aria-selected="true">
+                    <i class="fas fa-tachometer-alt me-1"></i> Dashboard
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="subreddit-tab" data-bs-toggle="tab" data-bs-target="#subreddit" 
+                    type="button" role="tab" aria-controls="subreddit" aria-selected="false">
+                    <i class="fas fa-chart-line me-1"></i> Subreddit Analyzer
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="sentiment-tab" data-bs-toggle="tab" data-bs-target="#sentiment" 
+                    type="button" role="tab" aria-controls="sentiment" aria-selected="false">
+                    <i class="fas fa-smile me-1"></i> Sentiment Tracker
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="thread-tab" data-bs-toggle="tab" data-bs-target="#thread" 
+                    type="button" role="tab" aria-controls="thread" aria-selected="false">
+                    <i class="fas fa-comments me-1"></i> Thread Visualizer
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="memes-tab" data-bs-toggle="tab" data-bs-target="#memes" 
+                    type="button" role="tab" aria-controls="memes" aria-selected="false">
+                    <i class="fas fa-image me-1"></i> Meme Fetcher
+                </button>
+            </li>
+
+        </ul>
+
+        <!-- Tab Content -->
+        <div class="tab-content" id="myTabContent">
+            <!-- Dashboard Tab -->
+            <div class="tab-pane fade show active" id="dashboard" role="tabpanel" aria-labelledby="dashboard-tab">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h2 class="card-title h5">Welcome to Reddit Analyzer</h2>
+                            </div>
+                            <div class="card-body">
+                                <p>This tool helps you analyze various aspects of Reddit content:</p>
+                                <div class="row row-cols-1 row-cols-md-3 g-4 mb-4">
+                                    <div class="col">
+                                        <div class="card h-100 feature-card">
+                                            <div class="card-body">
+                                                <h5 class="card-title"><i class="fas fa-chart-line text-primary me-2 feature-icon"></i>Subreddit Analysis</h5>
+                                                <p class="card-text">Analyze top posts, generate word clouds, and track post frequency.</p>
+                                                <a href="#" class="btn btn-sm btn-outline-primary mt-2" onclick="document.getElementById('subreddit-tab').click(); return false;">Explore <i class="fas fa-arrow-right ms-1"></i></a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <div class="card h-100 feature-card">
+                                            <div class="card-body">
+                                                <h5 class="card-title"><i class="fas fa-smile text-success me-2 feature-icon"></i>Sentiment Tracking</h5>
+                                                <p class="card-text">Track sentiment of posts based on keywords and visualize results.</p>
+                                                <a href="#" class="btn btn-sm btn-outline-success mt-2" onclick="document.getElementById('sentiment-tab').click(); return false;">Explore <i class="fas fa-arrow-right ms-1"></i></a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <div class="card h-100 feature-card">
+                                            <div class="card-body">
+                                                <h5 class="card-title"><i class="fas fa-comments text-info me-2 feature-icon"></i>Thread Visualization</h5>
+                                                <p class="card-text">Visualize comment threads in an interactive tree format.</p>
+                                                <a href="#" class="btn btn-sm btn-outline-info mt-2" onclick="document.getElementById('thread-tab').click(); return false;">Explore <i class="fas fa-arrow-right ms-1"></i></a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <div class="card h-100 feature-card">
+                                            <div class="card-body">
+                                                <h5 class="card-title"><i class="fas fa-image text-warning me-2 feature-icon"></i>Meme Collection</h5>
+                                                <p class="card-text">Browse and collect memes from popular subreddits.</p>
+                                                <a href="#" class="btn btn-sm btn-outline-warning mt-2" onclick="document.getElementById('memes-tab').click(); return false;">Explore <i class="fas fa-arrow-right ms-1"></i></a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col">
+                                        <div class="card h-100 feature-card">
+                                            <div class="card-body">
+                                                <h5 class="card-title"><i class="fas fa-bookmark text-danger me-2 feature-icon"></i>Saved Content</h5>
+                                                <p class="card-text">Track your saved searches and favorite content.</p>
+                                                <a href="#" class="btn btn-sm btn-outline-danger mt-2" onclick="return false;">View Saved <i class="fas fa-arrow-right ms-1"></i></a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12 col-lg-6">
+                        <!-- Tracked Subreddits -->
+                        <div class="card mb-4">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h3 class="card-title h5 mb-0">Tracked Subreddits</h3>
+                                <button class="btn btn-sm btn-primary" id="add-subreddit-btn">
+                                    <i class="fas fa-plus"></i> Add
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div id="tracked-subreddits" class="list-group">
+                                    <div class="text-center p-3 text-muted" id="no-subreddits-message">
+                                        <i class="fas fa-info-circle me-2"></i>No subreddits added yet
+                                    </div>
+                                    <!-- Subreddit items will be added here dynamically -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-lg-6">
+                        <!-- Tracked Keywords -->
+                        <div class="card mb-4">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h3 class="card-title h5 mb-0">Tracked Keywords</h3>
+                                <button class="btn btn-sm btn-primary" id="add-keyword-btn">
+                                    <i class="fas fa-plus"></i> Add
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div id="tracked-keywords" class="list-group">
+                                    <div class="text-center p-3 text-muted" id="no-keywords-message">
+                                        <i class="fas fa-info-circle me-2"></i>No keywords added yet
+                                    </div>
+                                    <!-- Keyword items will be added here dynamically -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+
+            <!-- Subreddit Analyzer Tab -->
+            <div class="tab-pane fade" id="subreddit" role="tabpanel" aria-labelledby="subreddit-tab">
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title h5">Subreddit Analyzer</h2>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <div class="input-group mb-3">
+                                            <input type="text" class="form-control" id="subreddit-input" 
+                                                placeholder="Enter subreddit name (e.g. 'programming')">
+                                            <button class="btn btn-primary" type="button" id="analyze-subreddit-btn">
+                                                <i class="fas fa-search me-1"></i>Analyze
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="input-group mb-3">
+                                            <label class="input-group-text" for="time-filter">Time</label>
+                                            <select class="form-select" id="time-filter">
+                                                <option value="day">Past Day</option>
+                                                <option value="week" selected>Past Week</option>
+                                                <option value="month">Past Month</option>
+                                                <option value="year">Past Year</option>
+                                                <option value="all">All Time</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Subreddit Results -->
+                <div id="subreddit-results" class="d-none">
+                    <div class="row">
+                        <div class="col-12 col-md-6 mb-4">
+                            <!-- Subreddit Info -->
+                            <div class="card h-100">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h3 class="card-title h5 mb-0">r/<span id="subreddit-name"></span></h3>
+                                    <button class="btn btn-sm btn-primary" id="track-subreddit-btn">
+                                        <i class="fas fa-bookmark me-1"></i>Track
+                                    </button>
+                                </div>
+                                <div class="card-body">
+                                    <div id="subreddit-info"></div>
+                                    <h5 class="mt-4">Top Contributors</h5>
+                                    <ul id="top-contributors" class="list-group"></ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6 mb-4">
+                            <!-- Word Cloud -->
+                            <div class="card h-100">
+                                <div class="card-header">
+                                    <h3 class="card-title h5">Word Cloud</h3>
+                                </div>
+                                <div class="card-body text-center">
+                                    <div id="wordcloud-container">
+                                        <img id="wordcloud-image" class="img-fluid" alt="Word Cloud">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <!-- Post Frequency -->
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="card-title h5">Post Frequency</h3>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="frequency-chart" height="300"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12">
+                            <!-- Top Posts -->
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="card-title h5">Top Posts</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Title</th>
+                                                    <th>Author</th>
+                                                    <th>Score</th>
+                                                    <th>Comments</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="posts-table-body"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Loading State -->
+                <div id="subreddit-loading" class="text-center py-5 d-none">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-3">Analyzing subreddit data...</p>
+                </div>
+
+                <!-- Error State -->
+                <div id="subreddit-error" class="alert alert-danger d-none" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <span id="subreddit-error-message"></span>
+                </div>
+            </div>
+
+            <!-- Sentiment Tracker Tab -->
+            <div class="tab-pane fade" id="sentiment" role="tabpanel" aria-labelledby="sentiment-tab">
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title h5">Sentiment Tracker</h2>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-5">
+                                        <div class="input-group">
+                                            <span class="input-group-text">r/</span>
+                                            <input type="text" class="form-control" id="sentiment-subreddit-input" 
+                                                placeholder="Subreddit name">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-5">
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                            <input type="text" class="form-control" id="sentiment-keyword-input" 
+                                                placeholder="Keyword (optional)">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button class="btn btn-primary w-100" id="analyze-sentiment-btn">
+                                            Analyze
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sentiment Results -->
+                <div id="sentiment-results" class="d-none">
+                    <div class="row">
+                        <div class="col-12 col-md-5 mb-4">
+                            <!-- Sentiment Overview -->
+                            <div class="card h-100">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h3 class="card-title h5 mb-0">Sentiment Analysis</h3>
+                                    <button class="btn btn-sm btn-primary" id="track-sentiment-btn">
+                                        <i class="fas fa-bookmark me-1"></i>Track
+                                    </button>
+                                </div>
+                                <div class="card-body">
+                                    <div id="sentiment-info">
+                                        <p><strong>Subreddit:</strong> r/<span id="sentiment-subreddit-name"></span></p>
+                                        <p><strong>Keyword:</strong> <span id="sentiment-keyword"></span></p>
+                                        <p><strong>Posts Analyzed:</strong> <span id="sentiment-posts-count"></span></p>
+                                    </div>
+                                    
+                                    <div class="sentiment-counts mt-4">
+                                        <div class="row text-center">
+                                            <div class="col-4">
+                                                <div class="card bg-success bg-opacity-10">
+                                                    <div class="card-body py-2">
+                                                        <h5 id="positive-count" class="display-6 mb-0">0</h5>
+                                                        <small>Positive</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-4">
+                                                <div class="card bg-secondary bg-opacity-10">
+                                                    <div class="card-body py-2">
+                                                        <h5 id="neutral-count" class="display-6 mb-0">0</h5>
+                                                        <small>Neutral</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-4">
+                                                <div class="card bg-danger bg-opacity-10">
+                                                    <div class="card-body py-2">
+                                                        <h5 id="negative-count" class="display-6 mb-0">0</h5>
+                                                        <small>Negative</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-7 mb-4">
+                            <!-- Sentiment Chart -->
+                            <div class="card h-100">
+                                <div class="card-header">
+                                    <h3 class="card-title h5">Sentiment Distribution</h3>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="sentiment-chart" height="260"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12">
+                            <!-- Detailed Results -->
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="card-title h5">Post Sentiment Details</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Title</th>
+                                                    <th>Author</th>
+                                                    <th>Score</th>
+                                                    <th>Sentiment</th>
+                                                    <th>Polarity</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="sentiment-table-body"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Loading State -->
+                <div id="sentiment-loading" class="text-center py-5 d-none">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-3">Analyzing sentiment data...</p>
+                </div>
+
+                <!-- Error State -->
+                <div id="sentiment-error" class="alert alert-danger d-none" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <span id="sentiment-error-message"></span>
+                </div>
+            </div>
+
+            <!-- Thread Visualizer Tab -->
+            <div class="tab-pane fade" id="thread" role="tabpanel" aria-labelledby="thread-tab">
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title h5">Comment Thread Visualizer</h2>
+                            </div>
+                            <div class="card-body">
+                                <p class="mb-3">Enter a Reddit post URL or ID to visualize the comment thread:</p>
+                                <div class="row g-3">
+                                    <div class="col-md-9">
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-link"></i></span>
+                                            <input type="text" class="form-control" id="post-url-input" 
+                                                placeholder="Post URL or ID (e.g., https://www.reddit.com/r/AskReddit/comments/abc123/...)">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <button class="btn btn-primary w-100" id="visualize-thread-btn">
+                                            Visualize
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Thread Results -->
+                <div id="thread-results" class="d-none">
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <!-- Post Details -->
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="card-title h5">Post Details</h3>
+                                </div>
+                                <div class="card-body">
+                                    <h4 id="thread-post-title" class="h5"></h4>
+                                    <p><strong>Author:</strong> <span id="thread-post-author"></span></p>
+                                    <p><strong>Score:</strong> <span id="thread-post-score"></span> | <strong>Comments:</strong> <span id="thread-post-comments"></span></p>
+                                    <div class="alert alert-secondary mt-3">
+                                        <p id="thread-post-content"></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12">
+                            <!-- Comment Visualization -->
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="card-title h5">Comment Thread Visualization</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div id="thread-visualization" class="visualization-container"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Loading State -->
+                <div id="thread-loading" class="text-center py-5 d-none">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-3">Fetching comment thread data...</p>
+                </div>
+
+                <!-- Error State -->
+                <div id="thread-error" class="alert alert-danger d-none" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <span id="thread-error-message"></span>
+                </div>
+            </div>
+
+            <!-- Meme Fetcher Tab -->
+            <div class="tab-pane fade" id="memes" role="tabpanel" aria-labelledby="memes-tab">
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title h5">Meme Fetcher</h2>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-7">
+                                        <div class="input-group">
+                                            <span class="input-group-text">r/</span>
+                                            <input type="text" class="form-control" id="meme-subreddit-input" 
+                                                placeholder="Subreddit name" value="memes">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="input-group">
+                                            <span class="input-group-text">#</span>
+                                            <input type="number" class="form-control" id="meme-count-input" 
+                                                placeholder="Count" value="10" min="1" max="20">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button class="btn btn-primary w-100" id="fetch-memes-btn">
+                                            Fetch
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Meme Results -->
+                <div id="meme-results" class="d-none">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="card-title h5">Memes from r/<span id="meme-subreddit-name"></span></h3>
+                                </div>
+                                <div class="card-body">
+                                    <div id="meme-grid" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Loading State -->
+                <div id="meme-loading" class="text-center py-5 d-none">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-3">Fetching memes...</p>
+                </div>
+
+                <!-- Error State -->
+                <div id="meme-error" class="alert alert-danger d-none" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <span id="meme-error-message"></span>
+                </div>
+            </div>
+
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="container mt-5 mb-4">
+        <div class="border-top pt-4">
+            <p class="text-center text-muted">
+                Reddit Analyzer - A tool for analyzing Reddit content. <i class="fab fa-reddit"></i>
+            </p>
+        </div>
+    </footer>
+
+    <!-- Toast for error messages -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="error-toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <i class="fas fa-exclamation-circle text-danger me-2"></i>
+                <strong class="me-auto">Error</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div id="error-toast-body" class="toast-body">
+                An error occurred.
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="loginModalLabel">Login to Reddit Analyzer</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="login-form">
+                        <div class="mb-3">
+                            <label for="username-input" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="username-input" required>
+                            <div class="form-text">This is a temporary session login. No password required.</div>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Login</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Subreddit Modal -->
+    <div class="modal fade" id="addSubredditModal" tabindex="-1" aria-labelledby="addSubredditModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addSubredditModalLabel">Add Subreddit to Track</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="add-subreddit-form">
+                        <div class="mb-3">
+                            <label for="new-subreddit-input" class="form-label">Subreddit Name</label>
+                            <input type="text" class="form-control" id="new-subreddit-input" required>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Add</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Keyword Modal -->
+    <div class="modal fade" id="addKeywordModal" tabindex="-1" aria-labelledby="addKeywordModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addKeywordModalLabel">Add Keyword to Track</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="add-keyword-form">
+                        <div class="mb-3">
+                            <label for="new-keyword-input" class="form-label">Keyword</label>
+                            <input type="text" class="form-control" id="new-keyword-input" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="keyword-subreddit-input" class="form-label">Subreddit (optional)</label>
+                            <input type="text" class="form-control" id="keyword-subreddit-input">
+                            <div class="form-text">Leave empty to track keyword across all tracked subreddits</div>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Add</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JavaScript -->
+    <script src="script.js"></script>
+</body>
+</html>
